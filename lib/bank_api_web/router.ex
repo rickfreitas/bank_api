@@ -10,5 +10,9 @@ defmodule BankApiWeb.Router do
     pipe_through [:api, :authenticate_api_user]
 
     resources "/users", UserController, except: [:new, :edit]
+    
+    put "/transactions/:id/revert", BalanceTransactionController, :revert_transaction
+    resources "/transactions", BalanceTransactionController, except: [:new, :edit]
+
   end
 end

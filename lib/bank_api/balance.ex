@@ -50,8 +50,10 @@ defmodule BankApi.Balance do
 
   """
   def create_balance_transaction(attrs \\ %{}) do
+    create_attrs = attrs |> Map.put("transaction_amount", attrs["amount"]) |> Map.delete("amount")
+
     %BalanceTransaction{}
-    |> BalanceTransaction.changeset(attrs)
+    |> BalanceTransaction.changeset(create_attrs)
     |> Repo.insert()
   end
 

@@ -16,7 +16,7 @@ defmodule BankApi.Balance.BalanceTransaction do
   @doc false
   def changeset(balance_transaction, attrs) do
     balance_transaction
-    |> cast(attrs, [:transaction_amount, :reversed])
-    |> validate_required([:transaction_amount])
+    |> cast(attrs, [:transaction_amount, :reversed, :sender_user_id, :receiver_user_id])
+    |> validate_required([:transaction_amount, :sender_user_id, :receiver_user_id])
   end
 end
