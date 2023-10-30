@@ -3,64 +3,6 @@ defmodule BankApi.BalanceTest do
 
   alias BankApi.Balance
 
-  describe "account_balances" do
-    alias BankApi.Balance.AccountBalance
-
-    import BankApi.BalanceFixtures
-
-    @invalid_attrs %{user_id: nil, inital_balance: nil, current_balance: nil}
-
-    test "list_account_balances/0 returns all account_balances" do
-      account_balance = account_balance_fixture()
-      assert Balance.list_account_balances() == [account_balance]
-    end
-
-    test "get_account_balance!/1 returns the account_balance with given id" do
-      account_balance = account_balance_fixture()
-      assert Balance.get_account_balance!(account_balance.id) == account_balance
-    end
-
-    test "create_account_balance/1 with valid data creates a account_balance" do
-      valid_attrs = %{user_id: "some user_id", inital_balance: 120.5, current_balance: 120.5}
-
-      assert {:ok, %AccountBalance{} = account_balance} = Balance.create_account_balance(valid_attrs)
-      assert account_balance.user_id == "some user_id"
-      assert account_balance.inital_balance == 120.5
-      assert account_balance.current_balance == 120.5
-    end
-
-    test "create_account_balance/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Balance.create_account_balance(@invalid_attrs)
-    end
-
-    test "update_account_balance/2 with valid data updates the account_balance" do
-      account_balance = account_balance_fixture()
-      update_attrs = %{user_id: "some updated user_id", inital_balance: 456.7, current_balance: 456.7}
-
-      assert {:ok, %AccountBalance{} = account_balance} = Balance.update_account_balance(account_balance, update_attrs)
-      assert account_balance.user_id == "some updated user_id"
-      assert account_balance.inital_balance == 456.7
-      assert account_balance.current_balance == 456.7
-    end
-
-    test "update_account_balance/2 with invalid data returns error changeset" do
-      account_balance = account_balance_fixture()
-      assert {:error, %Ecto.Changeset{}} = Balance.update_account_balance(account_balance, @invalid_attrs)
-      assert account_balance == Balance.get_account_balance!(account_balance.id)
-    end
-
-    test "delete_account_balance/1 deletes the account_balance" do
-      account_balance = account_balance_fixture()
-      assert {:ok, %AccountBalance{}} = Balance.delete_account_balance(account_balance)
-      assert_raise Ecto.NoResultsError, fn -> Balance.get_account_balance!(account_balance.id) end
-    end
-
-    test "change_account_balance/1 returns a account_balance changeset" do
-      account_balance = account_balance_fixture()
-      assert %Ecto.Changeset{} = Balance.change_account_balance(account_balance)
-    end
-  end
-
   describe "balance_transactions" do
     alias BankApi.Balance.BalanceTransaction
 

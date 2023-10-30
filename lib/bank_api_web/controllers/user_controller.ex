@@ -12,7 +12,12 @@ defmodule BankApiWeb.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    with {:ok, %User{} = user} <- Account.create_user(user_params) do
+    create_user_params = user_params
+    |> Map.put("initial_balance", user_params["balance"])
+    |> Map.put("current_balance", user_params["balance"])
+    |> Map.delete("balance")
+
+    with {:ok, %User{} = user} <- Account.create_user(create_user_params) do
       conn
       |> put_status(:created)
       |> put_resp_header("location", ~p"/api/users/#{user}")

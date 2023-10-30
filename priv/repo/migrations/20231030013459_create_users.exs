@@ -5,8 +5,9 @@ defmodule BankApi.Repo.Migrations.CreateUsers do
     create table(:users, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :name, :string
-      add :cpf, :integer
-      add :balance, :float
+      add :cpf, :"varchar(11)"
+      add :initial_balance, :float
+      add :current_balance, :float
 
       timestamps(type: :utc_datetime)
     end

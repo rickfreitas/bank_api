@@ -20,7 +20,7 @@ defmodule BankApiWeb.UserJSON do
       id: user.id,
       name: user.name,
       cpf: user.cpf,
-      balance: user.balance
+      balance: user.current_balance
     }
   end
 end

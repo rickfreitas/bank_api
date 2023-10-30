@@ -9,7 +9,7 @@ defmodule BankApi.Balance.BalanceTransaction do
     field :transaction_amount, :float
     field :sender_user_id, :binary_id
     field :receiver_user_id, :binary_id
-
+    
     timestamps(type: :utc_datetime)
   end
 
