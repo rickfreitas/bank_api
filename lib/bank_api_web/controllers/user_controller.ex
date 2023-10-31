@@ -7,6 +7,8 @@ defmodule BankApiWeb.UserController do
 
   action_fallback BankApiWeb.FallbackController
 
+  plug :authenticate_api_user when action in [:create]
+
   def index(conn, _params) do
     users = Account.list_users()
     render(conn, :index, users: users)
@@ -31,9 +33,10 @@ defmodule BankApiWeb.UserController do
     render(conn, :show, user: user)
   end
 
-  def trasactions_by_user(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-    transactions = Balance.get_balance_trasactions(id)
+  def trasactions_by_user(conn, _) do
+    user_id = conn.assigns.current_user
+    user = Account.get_user!(user_id)
+    transactions = Balance.get_balance_trasactions(user_id)
     render(conn, :show_transactions, %{user: user, transactions: transactions})
   end
 

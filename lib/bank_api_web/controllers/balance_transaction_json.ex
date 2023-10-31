@@ -19,6 +19,10 @@ defmodule BankApiWeb.BalanceTransactionJSON do
     %{errors: changeset.errors}
   end
 
+  def user_error(%{error: error}) do
+    %{user_error: "Error on UserAuthKey: #{error.message}"}
+  end
+
   def transaction_error(%{error: error}) do
     %{transaction_error: error.message}
   end

@@ -1,10 +1,14 @@
 defmodule BankApiWeb.BalanceTransactionController do
   use BankApiWeb, :controller
 
+  alias BankApi.Account
+  alias BankApi.Account.User
   alias BankApi.Balance
   alias BankApi.Balance.BalanceTransaction
 
   action_fallback BankApiWeb.FallbackController
+
+  plug :authenticate_api_user when action in [:create]
 
   def index(conn, _params) do
     balance_transactions = Balance.list_balance_transactions()
@@ -12,11 +16,27 @@ defmodule BankApiWeb.BalanceTransactionController do
   end
 
   def create(conn, %{"balance_transaction" => balance_transaction_params}) do
+    conn.assigns.current_user
+    |> Account.get_user!
+    |> handle_validated_user(balance_transaction_params, conn)
+  end
+
+  def handle_validated_user(%User{} = user, balance_transaction_params, conn) do
+    balance_transaction_params = Map.put(balance_transaction_params, "sender_user_id", user.id)
+
     case Balance.create_balance_transaction(balance_transaction_params) do
       {:ok, %BalanceTransaction{} = balance_transaction} -> success_response(conn, balance_transaction, :created)
       {:error, %Ecto.Changeset{} = changeset} -> render(conn, :error, changeset: changeset)
       {:error, error} -> render(conn, :transaction_error, error: error)
     end
+  end
+
+  def handle_validated_user(Ecto.NoResultsError, _, conn) do
+    render(conn, :user_error, error: "User does not exists")
+  end
+
+  def handle_validated_user(%{error: error}, _balance_transaction_params, conn) do
+    render(conn, :user_error, error: error)
   end
 
   def show(conn, %{"id" => id}) do

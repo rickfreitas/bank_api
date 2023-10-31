@@ -26,7 +26,6 @@ defmodule BankApiWeb do
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
       import Phoenix.Controller
-      import BankApiWeb.API.Auth, only: [authenticate_api_user: 2]
     end
   end
 
@@ -43,6 +42,7 @@ defmodule BankApiWeb do
         layouts: [html: BankApiWeb.Layouts]
 
       import Plug.Conn
+      import BankApiWeb.API.Auth, only: [authenticate_api_user: 2]
 
       unquote(verified_routes())
     end
