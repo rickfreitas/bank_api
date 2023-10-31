@@ -53,10 +53,17 @@ defmodule BankApiWeb.BalanceTransactionController do
   end
 
   def revert_transaction(conn, %{"id" => id}) do
+    user = Account.get_user(conn.assigns.current_user)
+
+    case user do
+      nil -> render(conn, :user_error, error: "User does not exists")
+      %User{} = user -> :ok
+    end
+
     balance_transaction = Balance.get_balance_transaction!(id)
 
-    case Balance.revert_balance_transaction(balance_transaction) do
-      {:ok, %BalanceTransaction{} = balance_transaction} -> render(conn, :show, balance_transaction: balance_transaction)
+    case Balance.revert_balance_transaction(balance_transaction, user) do
+      {:ok, %BalanceTransaction{} = balance_transaction} -> render(conn, :show_reverted, balance_transaction: balance_transaction)
       {:error, %Ecto.Changeset{} = changeset} -> render(conn, :error, changeset: changeset)
       {:error, error} -> render(conn, :transaction_error, error: error)
     end

@@ -7,7 +7,7 @@ defmodule BankApiWeb.UserController do
 
   action_fallback BankApiWeb.FallbackController
 
-  plug :authenticate_api_user when action in [:create]
+  plug :authenticate_api_user when action in [:trasactions_by_user, :show, :update, :delete]
 
   def index(conn, _params) do
     users = Account.list_users()
@@ -18,6 +18,7 @@ defmodule BankApiWeb.UserController do
     create_user_params = user_params
     |> Map.put("initial_balance", user_params["balance"])
     |> Map.put("current_balance", user_params["balance"])
+    |> Map.put("encrypted_password", user_params["password"])
     |> Map.delete("balance")
 
     with {:ok, %User{} = user} <- Account.create_user(create_user_params) do

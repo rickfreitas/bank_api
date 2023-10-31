@@ -8,6 +8,7 @@ defmodule BankApi.Repo.Migrations.CreateUsers do
       add :cpf, :"varchar(11)"
       add :initial_balance, :float
       add :current_balance, :float
+      add :encrypted_password, :string
 
       timestamps(type: :utc_datetime)
     end

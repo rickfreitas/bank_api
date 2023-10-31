@@ -9,7 +9,7 @@ defmodule BankApiWeb.Router do
   scope "/api", BankApiWeb do
     pipe_through [:api]
 
-    get "/auth/:id", AuthenticationController, :auth
+    post "/auth", AuthenticationController, :auth
 
     get "/users_transactions", UserController, :trasactions_by_user
     resources "/users", UserController, except: [:new, :edit]

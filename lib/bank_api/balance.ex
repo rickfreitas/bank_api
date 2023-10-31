@@ -67,13 +67,17 @@ defmodule BankApi.Balance do
     {:error, error}
   end
 
-  def revert_balance_transaction(attrs) do
+  def revert_balance_transaction(attrs, request_user) do
     if attrs.reversed do
       raise "Transaction already reversed"
     end
 
     sender_user = Account.get_user!(attrs.sender_user_id)
     receiver_user = Account.get_user!(attrs.receiver_user_id)
+
+    if sender_user.id != request_user.id do
+      raise "User not allowed to revert transaction"
+    end
 
     if receiver_user.current_balance < attrs.transaction_amount do
       raise "Insufficient funds on receiver account"
