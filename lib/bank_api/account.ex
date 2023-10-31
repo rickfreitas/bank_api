@@ -101,4 +101,17 @@ defmodule BankApi.Account do
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
   end
+
+
+  def get_user_balance!(user_id) do
+    user = get_user!(user_id)
+    user.current_balance
+  end
+
+  def update_user_balance(user_id, new_balance) do
+    IO.inspect(new_balance)
+    user_id
+    |> get_user!()
+    |> update_user(%{current_balance: new_balance})
+  end
 end

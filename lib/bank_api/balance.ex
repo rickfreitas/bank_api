@@ -7,6 +7,7 @@ defmodule BankApi.Balance do
   alias BankApi.Repo
 
   alias BankApi.Balance.BalanceTransaction
+  alias BankApi.Account
 
   @doc """
   Returns the list of balance_transactions.
@@ -50,11 +51,43 @@ defmodule BankApi.Balance do
 
   """
   def create_balance_transaction(attrs \\ %{}) do
-    create_attrs = attrs |> Map.put("transaction_amount", attrs["amount"]) |> Map.delete("amount")
+    if validate_transaction(attrs) do
+      %BalanceTransaction{}
+      |> BalanceTransaction.changeset(attrs)
+      |> Repo.insert()
+    else 
+      {:error, "Invalid transaction"}
+    end
+  end
 
-    %BalanceTransaction{}
-    |> BalanceTransaction.changeset(create_attrs)
-    |> Repo.insert()
+  defp validate_transaction(attrs) do
+    sender_user_id = attrs["sender_user_id"]
+    receiver_user_id = attrs["receiver_user_id"]
+    transaction_amount = attrs["transaction_amount"]
+
+    sender_balance = Account.get_user_balance!(sender_user_id)
+    receiver_balance = Account.get_user_balance!(receiver_user_id)
+
+    if sender_balance < transaction_amount do
+      raise "Insufficient funds"
+    end
+
+    if sender_user_id == receiver_user_id do
+      raise "Cannot transfer to self"
+    end
+
+    if transaction_amount <= 0 do
+      raise "Invalid transaction amount"
+    end
+
+    if receiver_balance == nil do
+      raise "Receiver does not exist"
+    end
+
+    sender_user = Account.update_user_balance(sender_user_id, sender_balance - transaction_amount)
+    receiver_user = Account.update_user_balance(receiver_user_id, receiver_balance + transaction_amount)
+
+    true
   end
 
   @doc """
