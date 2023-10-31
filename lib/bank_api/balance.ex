@@ -50,29 +50,51 @@ defmodule BankApi.Balance do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_balance_transaction(attrs \\ %{}) do
-    if validate_transaction(attrs) do
-      %BalanceTransaction{}
-      |> BalanceTransaction.changeset(attrs)
-      |> Repo.insert()
-    else 
-      {:error, "Invalid transaction"}
-    end
-  end
 
-  defp validate_transaction(attrs) do
+  def create_balance_transaction(attrs \\ %{}) do
+    transaction_amount = attrs["transaction_amount"] |> IO.inspect()
     sender_user_id = attrs["sender_user_id"]
     receiver_user_id = attrs["receiver_user_id"]
-    transaction_amount = attrs["transaction_amount"]
 
-    sender_balance = Account.get_user_balance!(sender_user_id)
-    receiver_balance = Account.get_user_balance!(receiver_user_id)
+    sender_user = Account.get_user!(sender_user_id) |> IO.inspect()
+    receiver_user = Account.get_user!(receiver_user_id)
 
-    if sender_balance < transaction_amount do
+    with {:ok, %{sender_user: _, receiver_user: _, balance_transaction: balance_transaction }}
+      <- validate_and_execute_transaction(sender_user, receiver_user, attrs, transaction_amount) do
+        {:ok, balance_transaction}
+      end
+  rescue error ->
+    {:error, error}
+  end
+
+  def revert_balance_transaction(attrs) do
+    if attrs.reversed do
+      raise "Transaction already reversed"
+    end
+
+    sender_user = Account.get_user!(attrs.sender_user_id)
+    receiver_user = Account.get_user!(attrs.receiver_user_id)
+
+    if receiver_user.current_balance < attrs.transaction_amount do
+      raise "Insufficient funds on receiver account"
+    end
+
+    with {:ok, %{sender_user: _, receiver_user: _, balance_transaction: balance_transaction }}
+      <- execute_reversion_on_db(sender_user, receiver_user, attrs) do
+        {:ok, balance_transaction}
+      end
+    rescue error ->
+      {:error, error}
+  end
+
+  defp validate_and_execute_transaction(sender_user, receiver_user, attrs, transaction_amount) do
+    errors = []
+    
+    if sender_user.current_balance < transaction_amount do
       raise "Insufficient funds"
     end
 
-    if sender_user_id == receiver_user_id do
+    if sender_user.id == receiver_user.id do
       raise "Cannot transfer to self"
     end
 
@@ -80,14 +102,27 @@ defmodule BankApi.Balance do
       raise "Invalid transaction amount"
     end
 
-    if receiver_balance == nil do
+    if receiver_user == nil do
       raise "Receiver does not exist"
-    end
+    end   
 
-    sender_user = Account.update_user_balance(sender_user_id, sender_balance - transaction_amount)
-    receiver_user = Account.update_user_balance(receiver_user_id, receiver_balance + transaction_amount)
+    execute_database_changes(sender_user, receiver_user, attrs, transaction_amount)
+  end
 
-    true
+  defp execute_database_changes(sender_user, receiver_user, attrs, transaction_amount) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:sender_user, Account.User.changeset(sender_user, %{"current_balance" => sender_user.current_balance - transaction_amount}))
+    |> Ecto.Multi.update(:receiver_user, Account.User.changeset(receiver_user, %{"current_balance" => receiver_user.current_balance + transaction_amount}))
+    |> Ecto.Multi.insert(:balance_transaction, BalanceTransaction.changeset(%BalanceTransaction{}, attrs))
+    |> Repo.transaction()
+  end
+
+  defp execute_reversion_on_db(sender_user, receiver_user, attrs) do
+    Ecto.Multi.new()
+    |> Ecto.Multi.update(:sender_user, Account.User.changeset(sender_user, %{"current_balance" => sender_user.current_balance + attrs.transaction_amount}))
+    |> Ecto.Multi.update(:receiver_user, Account.User.changeset(receiver_user, %{"current_balance" => receiver_user.current_balance - attrs.transaction_amount}))
+    |> Ecto.Multi.update(:balance_transaction, BalanceTransaction.changeset(attrs, %{"reversed" => true}))
+    |> Repo.transaction()
   end
 
   @doc """
@@ -135,5 +170,9 @@ defmodule BankApi.Balance do
   """
   def change_balance_transaction(%BalanceTransaction{} = balance_transaction, attrs \\ %{}) do
     BalanceTransaction.changeset(balance_transaction, attrs)
+  end
+
+  def get_balance_trasactions(user_id) do
+    Repo.all(from bt in BalanceTransaction, where: bt.sender_user_id == ^user_id or bt.receiver_user_id == ^user_id)
   end
 end

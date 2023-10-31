@@ -9,6 +9,7 @@ defmodule BankApiWeb.Router do
   scope "/api", BankApiWeb do
     pipe_through [:api, :authenticate_api_user]
 
+    get "/users/:id/transactions", UserController, :trasactions_by_user
     resources "/users", UserController, except: [:new, :edit]
     
     put "/transactions/:id/revert", BalanceTransactionController, :revert_transaction

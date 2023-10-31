@@ -3,6 +3,7 @@ defmodule BankApiWeb.UserController do
 
   alias BankApi.Account
   alias BankApi.Account.User
+  alias BankApi.Balance
 
   action_fallback BankApiWeb.FallbackController
 
@@ -28,6 +29,12 @@ defmodule BankApiWeb.UserController do
   def show(conn, %{"id" => id}) do
     user = Account.get_user!(id)
     render(conn, :show, user: user)
+  end
+
+  def trasactions_by_user(conn, %{"id" => id}) do
+    user = Account.get_user!(id)
+    transactions = Balance.get_balance_trasactions(id)
+    render(conn, :show_transactions, %{user: user, transactions: transactions})
   end
 
   def update(conn, %{"id" => id, "user" => user_params}) do

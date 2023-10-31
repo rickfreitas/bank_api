@@ -15,6 +15,14 @@ defmodule BankApiWeb.BalanceTransactionJSON do
     %{data: data(balance_transaction)}
   end
 
+  def error(%{changeset: changeset}) do
+    %{errors: changeset.errors}
+  end
+
+  def transaction_error(%{error: error}) do
+    %{transaction_error: error.message}
+  end
+
   defp data(%BalanceTransaction{} = balance_transaction) do
     %{
       id: balance_transaction.id,
