@@ -11,11 +11,13 @@ defmodule BankApiWeb.Router do
 
     post "/auth", AuthenticationController, :auth
 
+    post "/users", UserController, :create
+
     get "/user_transactions", UserController, :trasactions_by_user
     get "/user_balance", UserController, :balance_by_user
-    resources "/users", UserController, except: [:new, :edit]
+
     
     put "/transactions/:id/revert", BalanceTransactionController, :revert_transaction
-    resources "/transactions", BalanceTransactionController, except: [:new, :edit]
+    post "/transactions", BalanceTransactionController, :create
   end
 end

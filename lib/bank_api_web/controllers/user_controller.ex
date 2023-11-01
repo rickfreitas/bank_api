@@ -20,7 +20,6 @@ defmodule BankApiWeb.UserController do
     with {:ok, %User{} = user} <- Account.create_user(create_user_params) do
       conn
       |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/users/#{user}")
       |> render(:show, user: user)
     end
   end
@@ -41,19 +40,19 @@ defmodule BankApiWeb.UserController do
     render(conn, :show_balance, %{user: conn.assigns.current_user})
   end
 
-  def convert_date_range(start_date, end_date) do
+  defp convert_date_range(start_date, end_date) do
     start_date_range = start_of_day(start_date)
     end_date_range = end_of_day(end_date)
     {start_date_range, end_date_range}
   end
 
-  def start_of_day(date) do
+  defp start_of_day(date) do
     date
     |> Timex.parse!("{0D}/{0M}/{YYYY}")
     |> Timex.beginning_of_day()
   end
 
-  def end_of_day(date) do
+  defp end_of_day(date) do
     date
     |> Timex.parse!("{0D}/{0M}/{YYYY}")
     |> Timex.end_of_day()
