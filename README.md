@@ -6,6 +6,15 @@ BankApi is a Phoenix application that provides a set of RESTful API endpoints fo
 
 ## Getting Started
 
+### Starting Database
+
+This application uses Docker and Docker Compose to generate local database
+
+1. Ensure you have [Docker and DockerCompose installed](https://docs.docker.com/engine/install/)
+2. Run `docker compose up db -d
+
+### Starting Application
+
 To start your Phoenix server:
 
 1. Run `mix setup` to install and set up dependencies.
@@ -56,9 +65,9 @@ Response:
     }
 ```
 
-## Authentication (Unauthenticated)
+### Authentication (Unauthenticated)
 
-### POST /api/auth
+#### POST /api/auth
 
 Authenticate a user by sending the user ID and password in the request body:
 
@@ -77,9 +86,9 @@ Response:
     }
 ```
 
-## Transaction Registration (Authenticated)
+### Transaction Registration (Authenticated)
 
-### POST /api/transactions
+#### POST /api/transactions
 
 Register a new transaction by sending the transaction data in the request body:
 
@@ -103,9 +112,9 @@ Response:
     }
 ```
 
-## Transaction Reversion (Authenticated)
+### Transaction Reversion (Authenticated)
 
-### PUT /api/transactions/:id/revert
+#### PUT /api/transactions/:id/revert
 
 Revert a transaction by sending a request with the appropriate transaction ID in the URL and the Authorization header.
 
@@ -121,9 +130,9 @@ Response:
     }
 ```
 
-## Transaction Search by Date (Authenticated)
+### Transaction Search by Date (Authenticated)
 
-### GET /api/user_transactions
+#### GET /api/user_transactions
 
 Retrieve user transactions within a specific date range by including the start and end dates in the URL. For example:
 
@@ -155,9 +164,9 @@ Response:
     }
 ```
 
-## View User Balance (Authenticated)
+### View User Balance (Authenticated)
 
-### GET /api/user_balance
+#### GET /api/user_balance
 
 Retrieve the user's balance by including the Authorization header in the request.
 
