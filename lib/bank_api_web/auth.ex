@@ -1,10 +1,4 @@
 defmodule BankApiWeb.API.Auth do
-  @moduledoc """
-  A module plug that verifies the bearer token in the request headers and
-  assigns `:current_user`. The authorization header value may look like
-  `Bearer xxxxxxx`.
-  """
-
   import Plug.Conn
   import Phoenix.Controller
 
@@ -14,10 +8,7 @@ defmodule BankApiWeb.API.Auth do
     conn
     |> get_token()
     |> verify_token()
-    |> case do
-      {:ok, user_id} -> assign(conn, :current_user, user_id)
-      _unauthorized -> assign(conn, :current_user, nil)
-    end
+    |> validate_user(conn)
   end
 
   @doc """
@@ -40,20 +31,10 @@ defmodule BankApiWeb.API.Auth do
       |> put_status(:unauthorized)
       |> put_view(html: BankApiWeb.ErrorHTML, json: BankApiWeb.ErrorJSON)
       |> render(:"401.json")
-      # Stop any downstream transformations.
       |> halt()
     end
   end
 
-  @doc """
-  Generate a new token for a user id.
-
-  ## Examples
-
-      iex> BankApiWeb.API.Auth.generate_token(123)
-      "xxxxxxx"
-
-  """
   def generate_token(user_id) do
     Phoenix.Token.sign(
       BankApiWeb.Endpoint,
@@ -62,25 +43,6 @@ defmodule BankApiWeb.API.Auth do
     )
   end
 
-  @doc """
-  Verify a user token.
-
-  ## Examples
-
-      iex> BankApiWeb.API.Auth.verify_token("good-token")
-      {:ok, 1}
-
-      iex> BankApiWeb.API.Auth.verify_token("bad-token")
-      {:error, :invalid}
-
-      iex> BankApiWeb.API.Auth.verify_token("old-token")
-      {:error, :expired}
-
-      iex> BankApiWeb.API.Auth.verify_token(nil)
-      {:error, :missing}
-
-  """
-  @spec verify_token(nil | binary) :: {:error, :expired | :invalid | :missing} | {:ok, any}
   def verify_token(token) do
     one_month = 30 * 24 * 60 * 60
 
@@ -92,11 +54,21 @@ defmodule BankApiWeb.API.Auth do
     )
   end
 
-  @spec get_token(Plug.Conn.t()) :: nil | binary
   def get_token(conn) do
     case get_req_header(conn, "authorization") do
       ["Bearer " <> token] -> token
       _ -> nil
     end
+  end
+
+  defp validate_user({:ok, user_id}, conn) do
+    case BankApi.Account.get_user(user_id) do
+      nil -> assign(conn, :current_user, nil)
+      user -> assign(conn, :current_user, user)
+    end
+  end
+
+  defp validate_user(_unauthorized, conn) do
+    assign(conn, :current_user, nil)
   end
 end

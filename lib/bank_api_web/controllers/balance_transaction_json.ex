@@ -1,6 +1,4 @@
 defmodule BankApiWeb.BalanceTransactionJSON do
-  alias BankApi.Balance.BalanceTransaction
-
   def show(%{balance_transaction: balance_transaction}) do
     %{
       id: balance_transaction.id,

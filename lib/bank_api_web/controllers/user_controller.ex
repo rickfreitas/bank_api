@@ -10,11 +10,6 @@ defmodule BankApiWeb.UserController do
 
   plug :authenticate_api_user when action in [:trasactions_by_user, :show, :update, :delete]
 
-  def index(conn, _params) do
-    users = Account.list_users()
-    render(conn, :index, users: users)
-  end
-
   def create(conn, %{"user" => user_params}) do
     create_user_params = user_params
     |> Map.put("initial_balance", user_params["balance"])
@@ -30,25 +25,20 @@ defmodule BankApiWeb.UserController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
-    render(conn, :show, user: user)
-  end
-
   def trasactions_by_user(conn, %{"start" => start_date, "end" => end_date}) do
-    user_id = conn.assigns.current_user
-    user = Account.get_user!(user_id)
+    user_id = conn.assigns.current_user.id
+
     {start_date_range, end_date_range} = convert_date_range(start_date, end_date)
+
     transactions = Balance.get_balance_trasactions_by_date(user_id, start_date_range, end_date_range)
-    render(conn, :show_transactions, %{user: user, transactions: transactions})
+
+    render(conn, :show_transactions, %{user: conn.assigns.current_user, transactions: transactions})
   rescue
     _ -> render(conn, :invalid_date_filter, %{start_date: start_date, end_date: end_date})
   end
 
   def balance_by_user(conn, _) do
-    user_id = conn.assigns.current_user
-    user = Account.get_user!(user_id)
-    render(conn, :show_balance, %{user: user})
+    render(conn, :show_balance, %{user: conn.assigns.current_user})
   end
 
   def convert_date_range(start_date, end_date) do
