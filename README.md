@@ -24,12 +24,13 @@ All authenticated routes require the inclusion of an Authorization header in the
 }
 ```
 
-# Routes
-## User Registration (Unauthenticated)
+## Routes
 
-### POST /api/users
+### User Registration (Unauthenticated)
 
-    Register a new user by sending the following parameters in the request body:
+#### POST /api/users
+
+Register a new user by sending the following parameters in the request body:
 
 ```json
 {
@@ -43,6 +44,7 @@ All authenticated routes require the inclusion of an Authorization header in the
 ```
 
 Response:
+
 ```json
     {
       "data": {
@@ -58,7 +60,8 @@ Response:
 
 ### POST /api/auth
 
-    Authenticate a user by sending the user ID and password in the request body:
+Authenticate a user by sending the user ID and password in the request body:
+
 ```json
 {
   "id": "feb798e2-3924-4872-ba38-0d12a10d1234",
@@ -67,6 +70,7 @@ Response:
 ```
 
 Response:
+
 ```json
     {
       "authorization_key": "token_de_autorizacao"
@@ -77,7 +81,8 @@ Response:
 
 ### POST /api/transactions
 
-    Register a new transaction by sending the transaction data in the request body:
+Register a new transaction by sending the transaction data in the request body:
+
 ```json
 {
   "balance_transaction": {
@@ -88,6 +93,7 @@ Response:
 ```
 
 Response:
+
 ```json
     {
       "id": "d6892694-55bb-4abe-ba36-ce3e6906ff44",
@@ -101,9 +107,10 @@ Response:
 
 ### PUT /api/transactions/:id/revert
 
-    Revert a transaction by sending a request with the appropriate transaction ID in the URL and the Authorization header.
+Revert a transaction by sending a request with the appropriate transaction ID in the URL and the Authorization header.
 
-    Response:
+Response:
+
 ```json
     {
       "id": "b28a55a6-6229-4869-a592-0d91c1f6f891",
@@ -118,11 +125,11 @@ Response:
 
 ### GET /api/user_transactions
 
-    Retrieve user transactions within a specific date range by including the start and end dates in the URL. For example:
+Retrieve user transactions within a specific date range by including the start and end dates in the URL. For example:
 
-    /api/user_transactions?start=28/10/2023&end=31/10/2023
+/api/user_transactions?start=28/10/2023&end=31/10/2023
 
-    Response:
+Response:
 
 ```json
     {
@@ -152,9 +159,10 @@ Response:
 
 ### GET /api/user_balance
 
-    Retrieve the user's balance by including the Authorization header in the request.
+Retrieve the user's balance by including the Authorization header in the request.
 
-    Response:
+Response:
+
 ```json
 {
   "user": {
