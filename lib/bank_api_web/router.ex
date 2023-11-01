@@ -11,7 +11,8 @@ defmodule BankApiWeb.Router do
 
     post "/auth", AuthenticationController, :auth
 
-    get "/users_transactions", UserController, :trasactions_by_user
+    get "/user_transactions", UserController, :trasactions_by_user
+    get "/user_balance", UserController, :balance_by_user
     resources "/users", UserController, except: [:new, :edit]
     
     put "/transactions/:id/revert", BalanceTransactionController, :revert_transaction

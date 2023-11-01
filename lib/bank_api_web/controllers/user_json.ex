@@ -19,6 +19,14 @@ defmodule BankApiWeb.UserJSON do
     %{user: data(user), transactions: group_transactions(user.id, transactions)}
   end
 
+  def show_balance(%{user: user}) do
+    %{user: data(user)}
+  end
+
+  def invalid_date_filter(%{start_date: start_date, end_date: end_date}) do
+    %{error: "Invalid date filter", start_date: start_date, end_date: end_date}
+  end
+
   defp data(%User{} = user) do
     %{
       id: user.id,

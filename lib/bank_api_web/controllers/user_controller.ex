@@ -1,5 +1,6 @@
 defmodule BankApiWeb.UserController do
   use BankApiWeb, :controller
+  use Timex
 
   alias BankApi.Account
   alias BankApi.Account.User
@@ -34,26 +35,37 @@ defmodule BankApiWeb.UserController do
     render(conn, :show, user: user)
   end
 
-  def trasactions_by_user(conn, _) do
+  def trasactions_by_user(conn, %{"start" => start_date, "end" => end_date}) do
     user_id = conn.assigns.current_user
     user = Account.get_user!(user_id)
-    transactions = Balance.get_balance_trasactions(user_id)
+    {start_date_range, end_date_range} = convert_date_range(start_date, end_date)
+    transactions = Balance.get_balance_trasactions_by_date(user_id, start_date_range, end_date_range)
     render(conn, :show_transactions, %{user: user, transactions: transactions})
+  rescue
+    _ -> render(conn, :invalid_date_filter, %{start_date: start_date, end_date: end_date})
   end
 
-  def update(conn, %{"id" => id, "user" => user_params}) do
-    user = Account.get_user!(id)
-
-    with {:ok, %User{} = user} <- Account.update_user(user, user_params) do
-      render(conn, :show, user: user)
-    end
+  def balance_by_user(conn, _) do
+    user_id = conn.assigns.current_user
+    user = Account.get_user!(user_id)
+    render(conn, :show_balance, %{user: user})
   end
 
-  def delete(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
+  def convert_date_range(start_date, end_date) do
+    start_date_range = start_of_day(start_date)
+    end_date_range = end_of_day(end_date)
+    {start_date_range, end_date_range}
+  end
 
-    with {:ok, %User{}} <- Account.delete_user(user) do
-      send_resp(conn, :no_content, "")
-    end
+  def start_of_day(date) do
+    date
+    |> Timex.parse!("{0D}/{0M}/{YYYY}")
+    |> Timex.beginning_of_day()
+  end
+
+  def end_of_day(date) do
+    date
+    |> Timex.parse!("{0D}/{0M}/{YYYY}")
+    |> Timex.end_of_day()
   end
 end

@@ -176,7 +176,14 @@ defmodule BankApi.Balance do
     BalanceTransaction.changeset(balance_transaction, attrs)
   end
 
-  def get_balance_trasactions(user_id) do
-    Repo.all(from bt in BalanceTransaction, where: bt.sender_user_id == ^user_id or bt.receiver_user_id == ^user_id)
+  def get_balance_trasactions_by_date(user_id, start_date, end_date) do
+    query = from(balance_transaction in BalanceTransaction,
+      where: balance_transaction.sender_user_id == ^user_id or balance_transaction.receiver_user_id == ^user_id,
+      where: balance_transaction.inserted_at >= ^start_date,
+      where: balance_transaction.inserted_at <= ^end_date,
+      order_by: [asc: balance_transaction.inserted_at]
+    )
+
+    Repo.all(query)
   end
 end
